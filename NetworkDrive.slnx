@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="NetworkDrive.Application/NetworkDrive.Application.csproj" Id="b98d9709-7682-42f7-aefa-384372a23cd0" />
+  <Project Path="NetworkDrive.Domain/NetworkDrive.Domain.csproj" Id="c255f9cd-5fd1-4fa5-ae24-a83c3a087976" />
+  <Project Path="NetworkDrive.Infrastructure/NetworkDrive.Infrastructure.csproj" Id="5840d596-bd34-4e1c-9fad-ef387816545b" />
+  <Project Path="NetworkDrive.Web/NetworkDrive.Web.csproj" Id="1b9ac31d-34ea-40dc-a1f8-a1fbc4f6ca64" />
+</Solution>

@@ -1,0 +1,283 @@
+:root {
+  --nd-bg: #f4f6f9;
+  --nd-surface: #ffffff;
+  --nd-border: #e2e6ed;
+  --nd-text: #1e293b;
+  --nd-text-muted: #64748b;
+  --nd-accent: #4f6ef7;
+  --nd-accent-hover: #3b5de7;
+  --nd-success: #22c55e;
+  --nd-success-hover: #16a34a;
+  --nd-row-hover: #f8fafc;
+  --nd-radius: 0.75rem;
+  --nd-radius-sm: 0.5rem;
+  --nd-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --nd-transition: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html {
+  font-size: 14px;
+  position: relative;
+  min-height: 100%;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+body {
+  background-color: var(--nd-bg);
+  color: var(--nd-text);
+  font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  margin-bottom: 60px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Headings ──────────────────────────────────────────── */
+h4 a {
+  color: var(--nd-text) !important;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  transition: color var(--nd-transition);
+}
+
+h4 a:hover {
+  color: var(--nd-accent) !important;
+}
+
+h4 a svg {
+  opacity: 0.7;
+  transition: opacity var(--nd-transition);
+}
+
+h4 a:hover svg {
+  opacity: 1;
+}
+
+/* ── Breadcrumb ────────────────────────────────────────── */
+.breadcrumb {
+  background: var(--nd-surface);
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius-sm);
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+}
+
+.breadcrumb-item a {
+  color: var(--nd-accent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--nd-transition);
+}
+
+.breadcrumb-item a:hover {
+  color: var(--nd-accent-hover);
+  text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+  color: var(--nd-text-muted);
+  font-weight: 500;
+}
+
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--nd-border);
+}
+
+/* ── Card ──────────────────────────────────────────────── */
+.card {
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius) !important;
+  box-shadow: var(--nd-shadow);
+  overflow: hidden;
+}
+
+.card-header {
+  background: var(--nd-surface) !important;
+  border-bottom: 1px solid var(--nd-border);
+  padding: 0.75rem 1.25rem !important;
+}
+
+.card-header .text-uppercase {
+  letter-spacing: 0.06em;
+  font-size: 0.7rem !important;
+  color: var(--nd-text-muted) !important;
+}
+
+/* ── Buttons ───────────────────────────────────────────── */
+.btn {
+  border-radius: var(--nd-radius-sm);
+  font-weight: 500;
+  transition: all var(--nd-transition);
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.2);
+}
+
+.btn-primary {
+  background: var(--nd-accent);
+  border-color: var(--nd-accent);
+  color: #fff;
+}
+
+.btn-primary:hover, .btn-primary:focus {
+  background: var(--nd-accent-hover);
+  border-color: var(--nd-accent-hover);
+}
+
+.btn-success {
+  background: var(--nd-success);
+  border-color: var(--nd-success);
+}
+
+.btn-success:hover, .btn-success:focus {
+  background: var(--nd-success-hover);
+  border-color: var(--nd-success-hover);
+}
+
+.btn-outline-primary {
+  color: var(--nd-accent);
+  border-color: var(--nd-border);
+}
+
+.btn-outline-primary:hover {
+  background: var(--nd-accent);
+  border-color: var(--nd-accent);
+  color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(79, 110, 247, 0.25);
+}
+
+.btn-sm {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.85rem;
+}
+
+/* ── Upload section ────────────────────────────────────── */
+#uploadSection .card-body {
+  background: var(--nd-bg) !important;
+  border-bottom: 1px solid var(--nd-border) !important;
+  padding: 1rem 1.25rem;
+}
+
+/* ── Form controls ─────────────────────────────────────── */
+.form-control {
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius-sm);
+  transition: border-color var(--nd-transition), box-shadow var(--nd-transition);
+}
+
+.form-control:focus {
+  border-color: var(--nd-accent);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.15);
+}
+
+.form-label {
+  font-weight: 500;
+  color: var(--nd-text-muted);
+}
+
+/* ── Table ─────────────────────────────────────────────── */
+.table {
+  --bs-table-hover-bg: var(--nd-row-hover);
+  margin-bottom: 0;
+}
+
+.table thead th {
+  background: var(--nd-bg) !important;
+  border-bottom: 1px solid var(--nd-border) !important;
+  color: var(--nd-text-muted);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.7rem 0.75rem;
+}
+
+.table tbody tr {
+  transition: background-color var(--nd-transition);
+}
+
+.table tbody td {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Folder links */
+.table tbody a.fw-medium {
+  color: var(--nd-text);
+  font-weight: 600 !important;
+  transition: color var(--nd-transition);
+}
+
+.table tbody a.fw-medium:hover {
+  color: var(--nd-accent);
+}
+
+/* File names */
+.table tbody span {
+  color: var(--nd-text);
+}
+
+/* Folder icon amber tone */
+.text-warning {
+  color: #f59e0b !important;
+}
+
+/* File icon */
+.table .text-secondary {
+  color: var(--nd-text-muted) !important;
+}
+
+/* ── Empty state ───────────────────────────────────────── */
+.card-body.text-center.text-muted {
+  padding: 3.5rem 1rem !important;
+}
+
+.card-body.text-center .bi-folder2-open {
+  opacity: 0.15 !important;
+}
+
+.card-body.text-center p.mb-0 {
+  font-weight: 600;
+  color: var(--nd-text);
+  font-size: 1.05rem;
+}
+
+.card-body.text-center p.small {
+  color: var(--nd-text-muted);
+}
+
+/* ── Scrollbar (Webkit) ────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--nd-border);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--nd-text-muted);
+}
+
+/* ── Selection ─────────────────────────────────────────── */
+::selection {
+  background: rgba(79, 110, 247, 0.15);
+  color: var(--nd-text);
+}
