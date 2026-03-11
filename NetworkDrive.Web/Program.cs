@@ -1,6 +1,7 @@
 using NetworkDrive.Application.UseCases.BrowseFolder;
 using NetworkDrive.Domain.Interfaces;
 using NetworkDrive.Infrastructure.Storage;
+using NetworkDrive.Infrastructure.Transcoding;
 using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,6 +14,11 @@ builder.Services.Configure<StorageOptions>(
 
 builder.Services.AddScoped<IStorageRepository, LocalStorageRepository>();
 builder.Services.AddSingleton<INetworkShareAuthService, NetworkShareAuthService>();
+
+builder.Services.Configure<TranscodingOptions>(
+    builder.Configuration.GetSection("Transcoding"));
+
+builder.Services.AddSingleton<ITranscodingService, TranscodingService>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining<BrowseFolderQuery>());
