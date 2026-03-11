@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using NetworkDrive.Application.UseCases.BrowseFolder;
@@ -8,6 +9,7 @@ using NetworkDrive.Application.UseCases.DeleteFile;
 
 namespace NetworkDrive.Web.Controllers
 {
+    [Authorize]
     public class DriveController(IMediator mediator) : Controller
     {
         private readonly FileExtensionContentTypeProvider _contentTypeProvider = new();

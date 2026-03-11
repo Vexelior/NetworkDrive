@@ -1,11 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
+using NetworkDrive.Domain.Interfaces;
 
 namespace NetworkDrive.Web.Controllers;
 
-public class HomeController : Controller
+public class HomeController(INetworkShareAuthService shareAuth) : Controller
 {
     public IActionResult Index()
     {
-        return RedirectToAction("Index", "Drive");
+        if (User.Identity?.IsAuthenticated == true)
+            return RedirectToAction("Index", "Drive");
+
+        return RedirectToAction("Login", "Auth");
     }
 }

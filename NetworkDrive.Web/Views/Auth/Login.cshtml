@@ -1,0 +1,47 @@
+@{
+    ViewData["Title"] = "Sign In";
+    var error = ViewData["Error"] as string;
+    var returnUrl = ViewData["ReturnUrl"] as string;
+}
+
+<div class="login-wrapper">
+    <div class="login-card">
+        <div class="login-header">
+            <i class="bi bi-hdd-network login-icon"></i>
+            <h5 class="mb-1">Network Drive</h5>
+            <p class="text-muted small mb-0">Enter your credentials to continue</p>
+        </div>
+
+        @if (!string.IsNullOrEmpty(error))
+        {
+            <div class="alert alert-danger alert-sm mx-3 mt-3 mb-0">
+                <i class="bi bi-exclamation-circle me-1"></i> @error
+            </div>
+        }
+
+        <div class="login-body">
+            <form asp-action="Login" method="post">
+                <input type="hidden" name="returnUrl" value="@returnUrl" />
+                <div class="mb-3">
+                    <label for="username" class="form-label small">Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="username" name="username"
+                               placeholder="Enter username" required autofocus autocomplete="username" />
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label small">Password</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password"
+                               placeholder="Enter password" required autocomplete="current-password" />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                </button>
+            </form>
+        </div>
+    </div>
+</div>

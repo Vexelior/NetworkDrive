@@ -1,6 +1,7 @@
 using NetworkDrive.Application.UseCases.BrowseFolder;
 using NetworkDrive.Domain.Interfaces;
 using NetworkDrive.Infrastructure.Storage;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,9 +12,18 @@ builder.Services.Configure<StorageOptions>(
     builder.Configuration.GetSection("Storage:FileSystem"));
 
 builder.Services.AddScoped<IStorageRepository, LocalStorageRepository>();
+builder.Services.AddSingleton<INetworkShareAuthService, NetworkShareAuthService>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining<BrowseFolderQuery>());
+
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Home/Login";
+        options.ExpireTimeSpan = TimeSpan.FromDays(30);
+        options.SlidingExpiration = true;
+    });
 
 var app = builder.Build();
 
@@ -28,6 +38,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
