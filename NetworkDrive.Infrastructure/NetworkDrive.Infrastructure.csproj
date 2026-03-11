@@ -14,4 +14,8 @@
     <ProjectReference Include="..\NetworkDrive.Application\NetworkDrive.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Transcoding\" />
+  </ItemGroup>
+
 </Project>
