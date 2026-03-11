@@ -164,6 +164,59 @@ h4 a:hover svg {
   padding: 1rem 1.25rem;
 }
 
+.upload-dropzone {
+  border: 2px dashed var(--nd-border);
+  border-radius: var(--nd-radius);
+  padding: 2rem 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--nd-transition), background-color var(--nd-transition);
+  background: var(--nd-surface);
+}
+
+.upload-dropzone:hover {
+  border-color: var(--nd-accent);
+  background: rgba(79, 110, 247, 0.03);
+}
+
+.upload-dropzone.drag-over {
+  border-color: var(--nd-accent);
+  background: rgba(79, 110, 247, 0.07);
+}
+
+.upload-dropzone-icon {
+  font-size: 2rem;
+  color: var(--nd-text-muted);
+  opacity: 0.4;
+  display: block;
+  margin-bottom: 0.25rem;
+  transition: opacity var(--nd-transition), color var(--nd-transition);
+}
+
+.upload-dropzone:hover .upload-dropzone-icon,
+.upload-dropzone.drag-over .upload-dropzone-icon {
+  opacity: 0.8;
+  color: var(--nd-accent);
+}
+
+.upload-dropzone-text {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--nd-text);
+}
+
+.upload-dropzone-hint {
+  font-size: 0.78rem;
+  color: var(--nd-text-muted);
+}
+
+.upload-dropzone-filename {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--nd-accent);
+  min-height: 1.2em;
+}
+
 /* ── Form controls ─────────────────────────────────────── */
 .form-control {
   border: 1px solid var(--nd-border);
@@ -280,4 +333,255 @@ h4 a:hover svg {
 ::selection {
   background: rgba(79, 110, 247, 0.15);
   color: var(--nd-text);
+}
+
+/* ── Preview modal ─────────────────────────────────────── */
+#previewModal .modal-content {
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius);
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+#previewModal .modal-header {
+  background: var(--nd-bg);
+  border-bottom: 1px solid var(--nd-border);
+  padding: 0.75rem 1.25rem;
+}
+
+#previewModal .modal-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--nd-text);
+}
+
+#previewModal .modal-footer {
+  background: var(--nd-bg);
+  border-top: 1px solid var(--nd-border);
+  padding: 0.6rem 1.25rem;
+}
+
+.preview-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: var(--nd-radius-sm);
+}
+
+.preview-video {
+  width: 100%;
+  max-height: 70vh;
+  border-radius: var(--nd-radius-sm);
+  background: #0f172a;
+  display: block;
+  margin: 0 auto;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.preview-video:focus {
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.25);
+}
+
+.preview-video::-webkit-media-controls-panel {
+  background: linear-gradient(transparent, rgba(15, 23, 42, 0.8));
+}
+
+.preview-video::-webkit-media-controls-play-button,
+.preview-video::-webkit-media-controls-volume-slider,
+.preview-video::-webkit-media-controls-timeline {
+  filter: brightness(1.1);
+}
+
+.preview-audio {
+  width: 100%;
+  max-width: 400px;
+  margin-top: 1rem;
+}
+
+.preview-audio-icon {
+  font-size: 3rem;
+  color: var(--nd-accent);
+  opacity: 0.3;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.preview-pdf {
+  width: 100%;
+  height: 75vh;
+  border: none;
+}
+
+.preview-text {
+  margin: 0;
+  padding: 1.25rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  max-height: 70vh;
+  overflow: auto;
+  background: #1e293b;
+  color: #e2e8f0;
+  font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+  border-radius: 0;
+}
+
+/* ── Context menu ──────────────────────────────────────── */
+.ctx-menu {
+  position: fixed;
+  z-index: 1080;
+  min-width: 10rem;
+  padding: 0.35rem 0;
+  background: var(--nd-surface);
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius-sm);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(0.95);
+  transition: opacity var(--nd-transition), transform var(--nd-transition), visibility var(--nd-transition);
+}
+
+.ctx-menu.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: scale(1);
+}
+
+.ctx-menu-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 0.45rem 1rem;
+  border: none;
+  background: none;
+  color: var(--nd-text);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color var(--nd-transition), color var(--nd-transition);
+  text-align: left;
+}
+
+.ctx-menu-item:hover {
+  background: var(--nd-row-hover);
+  color: var(--nd-accent);
+}
+
+.ctx-menu-item i {
+  font-size: 0.9rem;
+  width: 1.1rem;
+  text-align: center;
+  color: var(--nd-text-muted);
+  transition: color var(--nd-transition);
+}
+
+.ctx-menu-item:hover i {
+  color: var(--nd-accent);
+}
+
+.ctx-menu-item-danger {
+  color: var(--nd-text-muted);
+}
+
+.ctx-menu-item-danger:hover {
+  background: #fef2f2;
+  color: #ef4444;
+}
+
+.ctx-menu-item-danger:hover i {
+  color: #ef4444;
+}
+
+.ctx-menu-divider {
+  height: 1px;
+  margin: 0.3rem 0.5rem;
+  background: var(--nd-border);
+}
+
+.ctx-row {
+  cursor: context-menu;
+}
+
+.ctx-row.ctx-active {
+  background: var(--nd-row-hover);
+}
+
+/* ── Progress modal ────────────────────────────────────── */
+#progressModal .modal-content {
+  border: 1px solid var(--nd-border);
+  border-radius: var(--nd-radius);
+  overflow: hidden;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+#progressModal .modal-header {
+  background: var(--nd-bg);
+  border-bottom: 1px solid var(--nd-border);
+  padding: 0.75rem 1.25rem;
+}
+
+#progressModal .modal-title {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--nd-text);
+  display: flex;
+  align-items: center;
+}
+
+#progressModal .modal-body {
+  padding: 1rem 1.25rem 1.1rem;
+}
+
+.progress-spinner-icon {
+  animation: spin 1s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.progress-filename {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--nd-text);
+  max-width: 70%;
+}
+
+.progress-pct {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--nd-accent);
+  white-space: nowrap;
+}
+
+.progress-bar-wrapper {
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--nd-border);
+  overflow: hidden;
+}
+
+.progress-bar-wrapper .progress-bar {
+  background: var(--nd-accent);
+  border-radius: 0.25rem;
+  transition: width 200ms ease;
+}
+
+.progress-bar-wrapper .progress-bar.indeterminate {
+  width: 100% !important;
+  animation: indeterminate 1.4s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, var(--nd-accent), transparent);
+}
+
+@keyframes indeterminate {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progress-eta {
+  font-size: 0.72rem;
+  color: var(--nd-text-muted);
+  min-height: 1em;
 }

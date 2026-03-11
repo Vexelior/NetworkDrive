@@ -60,14 +60,20 @@
 
     <div class="collapse" id="uploadSection">
         <div class="card-body border-bottom bg-light">
-            <form asp-action="Upload" method="post" enctype="multipart/form-data" class="row g-2 align-items-end">
+            <form asp-action="Upload" method="post" enctype="multipart/form-data" id="uploadForm">
                 <input type="hidden" name="path" value="@Model.CurrentPath" />
-                <div class="col">
-                    <label for="fileInput" class="form-label small mb-1">Select a file</label>
-                    <input type="file" class="form-control form-control-sm" id="fileInput" name="file" required />
+                <div class="upload-dropzone" id="uploadDropzone">
+                    <i class="bi bi-cloud-arrow-up upload-dropzone-icon"></i>
+                    <p class="upload-dropzone-text mb-1">Drag & drop a file here</p>
+                    <p class="upload-dropzone-hint mb-2">or</p>
+                    <label for="fileInput" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-folder2-open me-1"></i> Browse files
+                    </label>
+                    <input type="file" class="d-none" id="fileInput" name="file" required />
+                    <p class="upload-dropzone-filename mt-2 mb-0" id="uploadFileName"></p>
                 </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-success btn-sm">
+                <div class="text-center mt-2">
+                    <button type="submit" class="btn btn-success btn-sm" id="uploadSubmitBtn" disabled>
                         <i class="bi bi-cloud-arrow-up me-1"></i>
                         Upload File
                     </button>
@@ -82,16 +88,20 @@
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th class="ps-3" style="width: 50%;">Name</th>
-                        <th style="width: 20%;">Modified</th>
-                        <th class="text-end" style="width: 15%;">Size</th>
-                        <th class="text-center pe-3" style="width: 15%;">Actions</th>
+                        <th class="ps-3" style="width: 55%;">Name</th>
+                        <th style="width: 25%;">Modified</th>
+                        <th class="text-end pe-3" style="width: 20%;">Size</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var item in Model.Items.OrderByDescending(i => i.IsFolder).ThenBy(i => i.Name))
                     {
-                        <tr>
+                        <tr class="ctx-row"
+                            data-path="@item.RelativePath"
+                            data-name="@item.Name"
+                            data-is-folder="@item.IsFolder.ToString().ToLower()"
+                            data-download-url="@Url.Action("Download", new { path = item.RelativePath })"
+                            data-delete-url="@Url.Action("Delete")">
                             <td class="ps-3">
                                 @if (item.IsFolder)
                                 {
@@ -111,17 +121,8 @@
                             <td class="text-muted small">
                                 @item.ModifiedAt.ToString("MMM dd, yyyy h:mm tt")
                             </td>
-                            <td class="text-end text-muted small">
+                            <td class="text-end text-muted small pe-3">
                                 @FormatSize(item.SizeInBytes)
-                            </td>
-                            <td class="text-center pe-3">
-                                @if (!item.IsFolder)
-                                {
-                                    <a asp-action="Download" asp-route-path="@item.RelativePath"
-                                       class="btn btn-outline-primary btn-sm" title="Download">
-                                        <i class="bi bi-download"></i>
-                                    </a>
-                                }
                             </td>
                         </tr>
                     }
@@ -138,3 +139,402 @@
         </div>
     }
 </div>
+
+<div class="ctx-menu" id="ctxMenu">
+    <button type="button" class="ctx-menu-item" id="ctxPreview"><i class="bi bi-eye me-2"></i>Preview</button>
+    <button type="button" class="ctx-menu-item" id="ctxDownload"><i class="bi bi-download me-2"></i>Download</button>
+    <div class="ctx-menu-divider"></div>
+    <button type="button" class="ctx-menu-item ctx-menu-item-danger" id="ctxDelete"><i class="bi bi-trash me-2"></i>Delete</button>
+</div>
+
+<div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="previewModalLabel">
+                    <i class="bi bi-eye me-1"></i>
+                    <span id="previewFileName"></span>
+                </h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" id="previewBody">
+                <div class="text-center py-5" id="previewLoading">
+                    <div class="spinner-border text-secondary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <a href="#" id="previewDownloadLink" class="btn btn-primary btn-sm">
+                    <i class="bi bi-download me-1"></i> Download
+                </a>
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="progressModal" tabindex="-1" aria-labelledby="progressModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h6 class="modal-title" id="progressModalLabel">
+                    <i class="bi bi-arrow-repeat me-1 progress-spinner-icon" id="progressIcon"></i>
+                    <span id="progressTitle">Working…</span>
+                </h6>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-between align-items-baseline mb-1">
+                    <span class="progress-filename text-truncate me-2" id="progressFileName"></span>
+                    <span class="progress-pct" id="progressPct">0%</span>
+                </div>
+                <div class="progress progress-bar-wrapper">
+                    <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <div class="progress-eta text-end mt-1" id="progressEta"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+(function () {
+    const imageExts   = ['.jpg','.jpeg','.png','.gif','.bmp','.svg','.webp','.ico'];
+    const videoExts   = ['.mp4','.webm','.ogg','.mov', '.mkv'];
+    const audioExts   = ['.mp3','.wav','.ogg','.flac','.aac','.m4a'];
+    const textExts    = ['.txt','.cs','.js','.ts','.json','.xml','.html','.htm','.css',
+                         '.md','.yaml','.yml','.csv','.log','.ini','.cfg','.sh','.bat',
+                         '.ps1','.py','.rb','.java','.cpp','.c','.h','.sql','.csproj',
+                         '.sln','.razor','.cshtml'];
+    const pdfExts     = ['.pdf'];
+
+    function getExtension(name) {
+        const i = name.lastIndexOf('.');
+        return i >= 0 ? name.substring(i).toLowerCase() : '';
+    }
+
+    function previewUrl(path) {
+        return '@Url.Action("Preview")' + '?path=' + encodeURIComponent(path);
+    }
+
+    function downloadUrl(path) {
+        return '@Url.Action("Download")' + '?path=' + encodeURIComponent(path);
+    }
+
+    // ── Progress modal helpers ──
+    var progressModalEl = document.getElementById('progressModal');
+    var progressModal = new bootstrap.Modal(progressModalEl);
+    var progressBar = document.getElementById('progressBar');
+    var progressPct = document.getElementById('progressPct');
+    var progressEta = document.getElementById('progressEta');
+    var progressTitle = document.getElementById('progressTitle');
+    var progressFileName = document.getElementById('progressFileName');
+    var progressIcon = document.getElementById('progressIcon');
+    var progressStartTime = 0;
+
+    function showProgress(title, fileName, indeterminate) {
+        progressTitle.textContent = title;
+        progressFileName.textContent = fileName;
+        progressPct.textContent = indeterminate ? '' : '0%';
+        progressEta.textContent = '';
+        progressBar.style.width = '0%';
+        progressBar.setAttribute('aria-valuenow', '0');
+        progressBar.classList.toggle('indeterminate', !!indeterminate);
+        progressStartTime = Date.now();
+        progressModal.show();
+    }
+
+    var progressDoneCallback = null;
+
+    function updateProgress(loaded, total) {
+        if (!total || total <= 0) return;
+        var pct = Math.min(Math.round((loaded / total) * 100), 100);
+        progressBar.style.width = pct + '%';
+        progressBar.setAttribute('aria-valuenow', pct);
+        progressPct.textContent = pct + '%';
+
+        if (pct >= 100) {
+            progressEta.textContent = 'Done';
+            return;
+        }
+
+        var elapsed = (Date.now() - progressStartTime) / 1000;
+        if (pct > 2 && elapsed > 0.5) {
+            var totalTime = elapsed / (pct / 100);
+            var remaining = Math.max(Math.ceil(totalTime - elapsed), 0);
+            if (remaining >= 60) {
+                var m = Math.floor(remaining / 60);
+                var s = remaining % 60;
+                progressEta.textContent = m + 'm ' + s + 's remaining';
+            } else {
+                progressEta.textContent = remaining + 's remaining';
+            }
+        }
+    }
+
+    function completeProgress(callback) {
+        updateProgress(1, 1);
+        progressDoneCallback = callback || null;
+        setTimeout(function () {
+            progressModal.hide();
+        }, 600);
+    }
+
+    progressModalEl.addEventListener('hidden.bs.modal', function () {
+        progressBar.classList.remove('indeterminate');
+        if (progressDoneCallback) {
+            var cb = progressDoneCallback;
+            progressDoneCallback = null;
+            cb();
+        }
+    });
+
+    // ── Context menu ──
+    var ctxMenu = document.getElementById('ctxMenu');
+    var ctxPreview = document.getElementById('ctxPreview');
+    var ctxDownload = document.getElementById('ctxDownload');
+    var ctxDelete = document.getElementById('ctxDelete');
+    var ctxTarget = null;
+
+    function hideCtxMenu() {
+        ctxMenu.classList.remove('visible');
+        document.querySelectorAll('.ctx-row.ctx-active').forEach(function (r) {
+            r.classList.remove('ctx-active');
+        });
+        ctxTarget = null;
+    }
+
+    document.querySelectorAll('.ctx-row').forEach(function (row) {
+        row.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            ctxTarget = row;
+            var isFolder = row.dataset.isFolder === 'true';
+
+            ctxPreview.style.display = isFolder ? 'none' : '';
+            ctxDownload.style.display = isFolder ? 'none' : '';
+
+            document.querySelectorAll('.ctx-row.ctx-active').forEach(function (r) {
+                r.classList.remove('ctx-active');
+            });
+            row.classList.add('ctx-active');
+
+            var x = e.clientX;
+            var y = e.clientY;
+
+            ctxMenu.classList.add('visible');
+
+            var menuW = ctxMenu.offsetWidth;
+            var menuH = ctxMenu.offsetHeight;
+            if (x + menuW > window.innerWidth) x = window.innerWidth - menuW - 4;
+            if (y + menuH > window.innerHeight) y = window.innerHeight - menuH - 4;
+
+            ctxMenu.style.left = x + 'px';
+            ctxMenu.style.top = y + 'px';
+        });
+    });
+
+    document.addEventListener('click', function () { hideCtxMenu(); });
+    document.addEventListener('scroll', function () { hideCtxMenu(); }, true);
+    window.addEventListener('resize', function () { hideCtxMenu(); });
+
+    // ── Preview (from context menu) ──
+    function openPreview(filePath, fileName) {
+        var ext = getExtension(fileName);
+        var url = previewUrl(filePath);
+
+        document.getElementById('previewFileName').textContent = fileName;
+        document.getElementById('previewDownloadLink').href = downloadUrl(filePath);
+
+        var body = document.getElementById('previewBody');
+        body.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-secondary" role="status"></div></div>';
+
+        var modal = new bootstrap.Modal(document.getElementById('previewModal'));
+        modal.show();
+
+        if (imageExts.includes(ext)) {
+            body.innerHTML = '<div class="text-center p-3"><img src="' + url + '" class="preview-image" alt="' + fileName + '" /></div>';
+        } else if (videoExts.includes(ext)) {
+            body.innerHTML = '<div class="p-3"><video controls class="preview-video"><source src="' + url + '" />Your browser does not support video playback.</video></div>';
+        } else if (audioExts.includes(ext)) {
+            body.innerHTML = '<div class="p-4 text-center"><i class="bi bi-music-note-beamed preview-audio-icon"></i><audio controls class="preview-audio"><source src="' + url + '" />Your browser does not support audio playback.</audio></div>';
+        } else if (pdfExts.includes(ext)) {
+            body.innerHTML = '<iframe src="' + url + '" class="preview-pdf"></iframe>';
+        } else if (textExts.includes(ext)) {
+            fetch(url)
+                .then(function (r) { return r.text(); })
+                .then(function (text) {
+                    var pre = document.createElement('pre');
+                    pre.className = 'preview-text';
+                    pre.textContent = text;
+                    body.innerHTML = '';
+                    body.appendChild(pre);
+                })
+                .catch(function () {
+                    body.innerHTML = '<div class="text-center py-5 text-danger"><i class="bi bi-exclamation-triangle" style="font-size:2rem;"></i><p class="mt-2">Failed to load file.</p></div>';
+                });
+        } else {
+            body.innerHTML = '<div class="text-center py-5 text-muted"><i class="bi bi-file-earmark-x" style="font-size:3rem;"></i><p class="mt-2">Preview is not available for this file type.</p></div>';
+        }
+    }
+
+    ctxPreview.addEventListener('click', function () {
+        if (!ctxTarget) return;
+        openPreview(ctxTarget.dataset.path, ctxTarget.dataset.name);
+    });
+
+    document.getElementById('previewModal').addEventListener('hidden.bs.modal', function () {
+        document.getElementById('previewBody').innerHTML = '';
+    });
+
+    // ── Download (from context menu) ──
+    function startDownload(url, fileName) {
+        showProgress('Downloading\u2026', fileName, false);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+
+        xhr.addEventListener('progress', function (ev) {
+            if (ev.lengthComputable) {
+                updateProgress(ev.loaded, ev.total);
+            }
+        });
+
+        xhr.addEventListener('load', function () {
+            completeProgress(function () {
+                if (xhr.status === 200) {
+                    var blob = xhr.response;
+                    var a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    setTimeout(function () {
+                        URL.revokeObjectURL(a.href);
+                        a.remove();
+                    }, 100);
+                }
+            });
+        });
+
+        xhr.addEventListener('error', function () {
+            progressModal.hide();
+            alert('Download failed. Please try again.');
+        });
+
+        xhr.send();
+    }
+
+    ctxDownload.addEventListener('click', function () {
+        if (!ctxTarget) return;
+        startDownload(ctxTarget.dataset.downloadUrl, ctxTarget.dataset.name);
+    });
+
+    // ── Delete (from context menu) ──
+    function startDelete(deleteUrl, itemPath, itemName) {
+        if (!confirm('Are you sure you want to delete \"' + itemName + '\"? This cannot be undone.')) return;
+
+        showProgress('Deleting\u2026', itemName, true);
+
+        var formData = new FormData();
+        formData.append('path', itemPath);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', deleteUrl, true);
+
+        xhr.addEventListener('load', function () {
+            completeProgress(function () {
+                window.location.href = xhr.responseURL || window.location.href;
+            });
+        });
+
+        xhr.addEventListener('error', function () {
+            progressModal.hide();
+            alert('Delete failed. Please try again.');
+        });
+
+        xhr.send(formData);
+    }
+
+    ctxDelete.addEventListener('click', function () {
+        if (!ctxTarget) return;
+        startDelete(ctxTarget.dataset.deleteUrl, ctxTarget.dataset.path, ctxTarget.dataset.name);
+    });
+
+    // ── Drag & drop upload ──
+    var dropzone = document.getElementById('uploadDropzone');
+    var fileInput = document.getElementById('fileInput');
+    var fileNameEl = document.getElementById('uploadFileName');
+    var submitBtn = document.getElementById('uploadSubmitBtn');
+
+    function setFile(file) {
+        var dt = new DataTransfer();
+        dt.items.add(file);
+        fileInput.files = dt.files;
+        fileNameEl.textContent = file.name;
+        submitBtn.disabled = false;
+    }
+
+    ['dragenter', 'dragover'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+            e.preventDefault();
+            dropzone.classList.add('drag-over');
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(function (evt) {
+        dropzone.addEventListener(evt, function (e) {
+            e.preventDefault();
+            dropzone.classList.remove('drag-over');
+        });
+    });
+
+    dropzone.addEventListener('drop', function (e) {
+        if (e.dataTransfer.files.length > 0) {
+            setFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', function () {
+        if (fileInput.files.length > 0) {
+            fileNameEl.textContent = fileInput.files[0].name;
+            submitBtn.disabled = false;
+        }
+    });
+
+    // ── Upload with progress ──
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var form = this;
+        var file = fileInput.files[0];
+        if (!file) return;
+
+        var formData = new FormData(form);
+        showProgress('Uploading\u2026', file.name, false);
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action, true);
+
+        xhr.upload.addEventListener('progress', function (ev) {
+            if (ev.lengthComputable) {
+                updateProgress(ev.loaded, ev.total);
+            }
+        });
+
+        xhr.addEventListener('load', function () {
+            completeProgress(function () {
+                window.location.href = xhr.responseURL || window.location.href;
+            });
+        });
+
+        xhr.addEventListener('error', function () {
+            progressModal.hide();
+            alert('Upload failed. Please try again.');
+        });
+
+        xhr.send(formData);
+    });
+})();
+</script>
+}
