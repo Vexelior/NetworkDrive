@@ -2,8 +2,12 @@ using NetworkDrive.Application.UseCases.BrowseFolder;
 using NetworkDrive.Domain.Interfaces;
 using NetworkDrive.Infrastructure.Storage;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, configuration) =>
+    configuration.ReadFrom.Configuration(context.Configuration));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -36,6 +40,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseSerilogRequestLogging();
 app.UseRouting();
 
 app.UseAuthentication();
