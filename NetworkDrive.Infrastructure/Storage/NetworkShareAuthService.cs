@@ -7,8 +7,8 @@ namespace NetworkDrive.Infrastructure.Storage;
 
 public class NetworkShareAuthService(IOptions<StorageOptions> options) : INetworkShareAuthService
 {
-    private const int LOGON32_LOGON_NEW_CREDENTIALS = 9;
-    private const int LOGON32_PROVIDER_WINNT50 = 3;
+    private const int Logon32LogonNewCredentials = 9;
+    private const int Logon32ProviderWinnt50 = 3;
 
     public bool ValidateCredentials(string username, string password)
     {
@@ -29,7 +29,7 @@ public class NetworkShareAuthService(IOptions<StorageOptions> options) : INetwor
         }
 
         if (!LogonUser(user, domain, password,
-                LOGON32_LOGON_NEW_CREDENTIALS, LOGON32_PROVIDER_WINNT50,
+                Logon32LogonNewCredentials, Logon32ProviderWinnt50,
                 out var token))
         {
             return false;

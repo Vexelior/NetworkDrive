@@ -11,19 +11,19 @@ public class NetworkImpersonator(
     INetworkCredentialProvider credentialProvider,
     IOptions<StorageOptions> options) : INetworkImpersonator
 {
-    private const int LOGON32_LOGON_NEW_CREDENTIALS = 9;
-    private const int LOGON32_PROVIDER_WINNT50 = 3;
+    private const int Logon32LogonNewCredentials = 9;
+    private const int Logon32ProviderWinnt50 = 3;
 
     public async Task<T> RunAsync<T>(Func<Task<T>> action)
     {
         var (username, password) = credentialProvider.GetCredentials();
         if (username is null || password is null)
-            return await action();
+            throw new UnauthorizedAccessException("Network credentials are not available. Please log in again.");
 
         ParseDomainUser(username, out var domain, out var user);
 
         if (!LogonUser(user, domain, password,
-                LOGON32_LOGON_NEW_CREDENTIALS, LOGON32_PROVIDER_WINNT50,
+                Logon32LogonNewCredentials, Logon32ProviderWinnt50,
                 out var token))
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());

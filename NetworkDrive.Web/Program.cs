@@ -28,7 +28,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
     {
-        options.LoginPath = "/Home/Login";
+        options.LoginPath = "/Auth/Login";
         options.ExpireTimeSpan = TimeSpan.FromDays(30);
         options.SlidingExpiration = true;
     });
