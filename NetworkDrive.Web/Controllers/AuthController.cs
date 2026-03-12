@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using NetworkDrive.Domain.Interfaces;
+using NetworkDrive.Web.Services;
 
 namespace NetworkDrive.Web.Controllers;
 
@@ -24,7 +25,8 @@ public class AuthController(INetworkShareAuthService shareAuth) : Controller
         {
             var claims = new List<Claim>
             {
-                new(ClaimTypes.Name, username)
+                new(ClaimTypes.Name, username),
+                new(HttpContextNetworkCredentialProvider.PasswordClaimType, password),
             };
 
             var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);

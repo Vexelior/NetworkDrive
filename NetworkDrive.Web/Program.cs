@@ -1,6 +1,7 @@
 using NetworkDrive.Application.UseCases.BrowseFolder;
 using NetworkDrive.Domain.Interfaces;
 using NetworkDrive.Infrastructure.Storage;
+using NetworkDrive.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Serilog;
 
@@ -17,6 +18,9 @@ builder.Services.Configure<StorageOptions>(
 
 builder.Services.AddScoped<IStorageRepository, LocalStorageRepository>();
 builder.Services.AddSingleton<INetworkShareAuthService, NetworkShareAuthService>();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<INetworkCredentialProvider, HttpContextNetworkCredentialProvider>();
+builder.Services.AddScoped<INetworkImpersonator, NetworkImpersonator>();
 
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssemblyContaining<BrowseFolderQuery>());
