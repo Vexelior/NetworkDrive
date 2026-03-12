@@ -2,6 +2,7 @@ using NetworkDrive.Application.UseCases.BrowseFolder;
 using NetworkDrive.Domain.Interfaces;
 using NetworkDrive.Infrastructure.Storage;
 using NetworkDrive.Web.Services;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Serilog;
 
@@ -48,6 +49,21 @@ app.UseSerilogRequestLogging();
 app.UseRouting();
 
 app.UseAuthentication();
+
+// Sign out users with stale cookies that are missing the network password claim
+// (e.g. cookies issued before the impersonation update) and redirect to login.
+app.Use(async (context, next) =>
+{
+    if (context.User.Identity?.IsAuthenticated == true &&
+        context.User.FindFirst(HttpContextNetworkCredentialProvider.PasswordClaimType) is null)
+    {
+        await context.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        context.Response.Redirect("/Auth/Login");
+        return;
+    }
+    await next();
+});
+
 app.UseAuthorization();
 
 app.MapStaticAssets();

@@ -1,6 +1,8 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using Microsoft.Extensions.Options;
+using Microsoft.Win32.SafeHandles;
 using NetworkDrive.Domain.Interfaces;
 
 namespace NetworkDrive.Infrastructure.Storage;
@@ -35,8 +37,29 @@ public class NetworkShareAuthService(IOptions<StorageOptions> options) : INetwor
             return false;
         }
 
-        CloseHandle(token);
-        return true;
+        // LOGON32_LOGON_NEW_CREDENTIALS always succeeds locally; the password
+        // is only checked when the token is used against a remote resource.
+        // Verify by actually probing the network share.
+        using (token)
+        {
+            try
+            {
+                WindowsIdentity.RunImpersonated(token, () =>
+                    Directory.Exists(options.Value.RootPath));
+                // Attempt a lightweight directory listing to force authentication.
+                WindowsIdentity.RunImpersonated(token, () =>
+                    Directory.GetDirectories(options.Value.RootPath, "*", new EnumerationOptions { RecurseSubdirectories = false }));
+                return true;
+            }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
+        }
     }
 
     private static string ExtractHost(string uncPath)
@@ -55,9 +78,5 @@ public class NetworkShareAuthService(IOptions<StorageOptions> options) : INetwor
         string lpszPassword,
         int dwLogonType,
         int dwLogonProvider,
-        out nint phToken);
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    private static extern bool CloseHandle(nint hObject);
+        out SafeAccessTokenHandle phToken);
 }
